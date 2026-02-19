@@ -43,10 +43,3 @@ rake rabbitmq:consume
 ## 🏗️ Arquitectura
 Para una explicación detallada de los patrones de diseño (Gateway, Command, EDA) y diagramas de flujo, consulta:
 👉 **[DOCUMENTACION.md](./DOCUMENTACION.md)**
-
-## 📜 Reglas del Proyecto
-Principios arquitectónicos y convenciones aplicadas:
-👉 **[REGLAS.md](./REGLAS.md)**
-
----
-*Desarrollado como prueba técnica de alto nivel (Senior).*
