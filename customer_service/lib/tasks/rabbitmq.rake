@@ -45,6 +45,9 @@ namespace :rabbitmq do
             puts err_msg
             logger.error(err_msg)
           end
+        when 'order.processed'
+          # Ignoramos nuestro propio evento de feedback para evitar ruido en los logs
+          nil
         else
           logger.warn(" [?] Unknown event type: #{routing_key}")
         end
