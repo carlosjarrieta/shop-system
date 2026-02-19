@@ -34,14 +34,14 @@ namespace :rabbitmq do
 
         case routing_key
         when 'order.created'
-          customer_id = payload['customer_id']
-          if customer = Customer.find_by(id: customer_id)
-            customer.increment!(:orders_count)
-            res_msg = " [v] Updated Customer ##{customer_id} orders_count to #{customer.orders_count}"
+          result = UpdateCustomerOrdersService.call(payload)
+          
+          if result[:success]
+            res_msg = " [v] Updated Customer ##{result[:customer].id} orders_count to #{result[:customer].orders_count}"
             puts res_msg
             logger.info(res_msg)
           else
-            err_msg = " [!] Customer ##{customer_id} not found"
+            err_msg = " [!] #{result[:error]}"
             puts err_msg
             logger.error(err_msg)
           end

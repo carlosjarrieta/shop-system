@@ -41,10 +41,15 @@ Este esquema visual representa la interacción entre servicios, bases de datos y
           | (6) Consume Evento
           v
 +-----------------------+
-|  CUSTOMER_WORKER      |  ---> [ Actualiza orders_count en DB_CUSTOMERS ]
-|  (Rake Task)          |
-+-----------------------+
+|  CUSTOMER_WORKER      | --(Delegates)--> [ UpdateCustomerOrdersService ]
+|  (Rake Task)          |                    |
++-----------------------+                    | (7) Update Stats
+                                             v
+                                   +-----------------------+
+                                   | DB_CUSTOMERS(Postgres)|
+                                   +-----------------------+
 ```
+
 
 ### Gestión de Variables de Entorno (.env)
 Actualmente, utilizamos un archivo `.env` centralizado en la raíz para la configuración de la **Infraestructura** (Docker Compose).
