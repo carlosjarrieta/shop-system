@@ -67,3 +67,14 @@ Para facilitar la verificación del sistema, he incluido una colección lista pa
 👉 **`shop_system_collection.json`**
 
 Al importarla en tu cliente HTTP preferido (Postman o Insomnia), tendrás todos los endpoints listos para realizar el flujo de creación de clientes y órdenes con un solo clic.
+
+## 📸 Capturas de Pantalla
+
+**Vista de RabbitMQ:**
+
+![Vista de RabbitMQ](./images/rabbitMQ_view.png)
+
+**Vista de Terminales (Servicios y Workers ejecutándose):**
+
+![Vista de Terminales](./images/terminal_view.png)
+
