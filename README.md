@@ -61,3 +61,9 @@ cd order_service && RAILS_ENV=test bundle exec rake db:prepare && bundle exec rs
 # Customer Service Tests
 cd customer_service && RAILS_ENV=test bundle exec rake db:prepare && bundle exec rspec
 ```
+
+### 🛠️ Pruebas Manuales (Postman / Insomnia)
+Para facilitar la verificación del sistema, he incluido una colección lista para importar en la raíz del proyecto:
+👉 **`shop_system_collection.json`**
+
+Al importarla en tu cliente HTTP preferido (Postman o Insomnia), tendrás todos los endpoints listos para realizar el flujo de creación de clientes y órdenes con un solo clic.
