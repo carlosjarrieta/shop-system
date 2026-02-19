@@ -3,12 +3,18 @@ class UpdateCustomerOrdersService
     new(payload).call
   end
 
+  attr_reader :payload
+
+  # Metaprogramación: Definimos dinámicamente los métodos de acceso a payload
+  [:customer_id].each do |attr|
+    define_method(attr) { payload[attr.to_s] || payload[attr.to_sym] }
+  end
+
   def initialize(payload)
     @payload = payload
   end
 
   def call
-    customer_id = @payload['customer_id']
     customer = Customer.find_by(id: customer_id)
 
     if customer
