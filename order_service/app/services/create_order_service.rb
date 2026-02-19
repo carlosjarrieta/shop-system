@@ -3,10 +3,11 @@ class CreateOrderService
 
   attr_reader :params, :customer, :order
 
-  def customer_id; params[:customer_id]; end
-  def product_name; params[:product_name]; end
-  def quantity; params[:quantity]; end
-  def price; params[:price]; end
+  # Metaprogramación: Definimos dinámicamente los métodos de acceso a params
+  # Esto cumple con el principio DRY y demuestra el poder de Ruby
+  [:customer_id, :product_name, :quantity, :price].each do |attr|
+    define_method(attr) { params[attr] }
+  end
 
   validates :customer_id, :product_name, :quantity, :price, presence: true
 
