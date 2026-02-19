@@ -19,10 +19,10 @@ namespace :rabbitmq do
     connection.start
 
     channel = connection.create_channel
-    exchange = channel.fanout('shop_system.events')
+    exchange = channel.fanout(ENV.fetch('RABBITMQ_EXCHANGE', 'shop_system.events'))
 
     # Queue específica para el Order Service
-    queue = channel.queue('order_service.responses_queue', durable: true)
+    queue = channel.queue(ENV.fetch('ORDER_RESPONSES_QUEUE', 'order_service.responses_queue'), durable: true)
     queue.bind(exchange)
 
     begin

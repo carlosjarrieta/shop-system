@@ -14,7 +14,7 @@ class EventPublisher
     connection.start
 
     channel = connection.create_channel
-    exchange = channel.fanout('shop_system.events')
+    exchange = channel.fanout(ENV.fetch('RABBITMQ_EXCHANGE', 'shop_system.events'))
 
     exchange.publish(payload.to_json, routing_key: event_name)
     

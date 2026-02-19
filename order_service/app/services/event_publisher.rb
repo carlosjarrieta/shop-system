@@ -20,7 +20,7 @@ class EventPublisher
     @channel = @connection.create_channel
 
     # Exchange Type: 'direct' or 'topic'. For this test, 'fanout' or 'direct' is simpler.
-    @exchange = @channel.fanout('shop_system.events')
+    @exchange = @channel.fanout(ENV.fetch('RABBITMQ_EXCHANGE', 'shop_system.events'))
   end
 
   def publish(routing_key, payload)
