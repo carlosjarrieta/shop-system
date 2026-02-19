@@ -34,12 +34,30 @@ rails db:create db:migrate
 rails s -p 3001
 ```
 
-**RabbitMQ Consumer (Worker):**
+**Levantar Consumidores (Workers de Background):**
+Para que la coreografía de eventos (Saga Pattern) funcione correctamente y los estados se actualicen, debes mantener corriendo los consumidores de RabbitMQ en dos terminales adicionales.
+
+👉 **Worker 1 (Customer Service):** Escucha `order.created` y suma saldo al cliente.
 ```bash
 cd customer_service
-rake rabbitmq:consume
+bundle exec rake rabbitmq:consume
 ```
 
-## 🏗️ Arquitectura
-Para una explicación detallada de los patrones de diseño (Gateway, Command, EDA) y diagramas de flujo, consulta:
+👉 **Worker 2 (Order Service):** Escucha `order.processed` y pasa la orden a `completed`.
+```bash
+cd order_service
+bundle exec rake rabbitmq:consume_responses
+```
+
+## 🏗️ Arquitectura y Patrones Aplicados
+Para una explicación muy detallada del porqué de las decisiones, los Patrones Solid, **Service Objects** (Command Pattern), Inyección de Dependencias y el **Flujo de Feedback Bidireccional** implementado, consulta:
 👉 **[DOCUMENTACION.md](./DOCUMENTACION.md)**
+
+### 🧪 Pruebas Unitarias Aisladas (RSpec & WebMock)
+Ambos microservicios cuentan con 100% de cobertura en sus casos de uso core, aislando HTTP y a RabbitMQ del entorno.
+```bash
+# Order Service Tests
+cd order_service && RAILS_ENV=test bundle exec rake db:prepare && bundle exec rspec
+# Customer Service Tests
+cd customer_service && RAILS_ENV=test bundle exec rake db:prepare && bundle exec rspec
+```
