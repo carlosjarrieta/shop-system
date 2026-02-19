@@ -52,6 +52,23 @@ Este esquema visual representa la interacción entre servicios, bases de datos y
 3. El **Order Service** lo escucha y actualiza el estado de la orden de `pending` a `completed`.
 4. Esto garantiza **Consistencia Eventual Bi-direccional**.
 
+### 🧪 Pruebas Automatizadas (RSpec)
+Cada microservicio cuenta con su propia suite de pruebas unitarias y de integración (usando mocks para servicios externos).
+
+**Para ejecutar las pruebas del Order Service:**
+```bash
+cd order_service
+RAILS_ENV=test bundle exec rake db:prepare
+bundle exec rspec
+```
+
+**Para ejecutar las pruebas del Customer Service:**
+```bash
+cd customer_service
+RAILS_ENV=test bundle exec rake db:prepare
+bundle exec rspec
+```
+
 
 
 ### Gestión de Variables de Entorno (.env)
