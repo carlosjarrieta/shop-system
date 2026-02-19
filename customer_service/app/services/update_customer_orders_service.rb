@@ -19,6 +19,10 @@ class UpdateCustomerOrdersService
 
     if customer
       customer.increment!(:orders_count)
+      
+      # Feedback Loop: Notificamos de vuelta al Order Service que el proceso terminó
+      EventPublisher.publish('order.processed', { order_id: @payload['order_id'] })
+      
       { success: true, customer: customer }
     else
       { success: false, error: "Customer ##{customer_id} not found" }

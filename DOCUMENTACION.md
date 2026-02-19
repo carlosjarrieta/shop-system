@@ -23,32 +23,35 @@ Este esquema visual representa la interacción entre servicios, bases de datos y
 |    ORDER SERVICE      | -------------------------------------------> |   CUSTOMER SERVICE    |
 |   (Puerto 3001)       | <------------------------------------------- |    (Puerto 3000)      |
 +-----------------------+          (Respuesta: "Existe/No Existe")      +-----------------------+
-          |                                                                        |
-          | (3) Persiste Orden                                                     | (5) Lee/Escribe
-          v                                                                        v
-+-----------------------+                                                +-----------------------+
-|   DB_ORDERS (Postgres)|                                                | DB_CUSTOMERS(Postgres)|
-|   (Puerto 5434)       |                                                |    (Puerto 5433)      |
-+-----------------------+                                                +-----------------------+
-          |
-          | (4) EVENTO: "order.created" (Asíncrono)
-          v
-+-----------------------+
-|       RABBITMQ        |
-|    (Message Broker)   |
-+-----------------------+
-          |
-          | (6) Consume Evento
-          v
-+-----------------------+
-|  CUSTOMER_WORKER      | --(Delegates)--> [ UpdateCustomerOrdersService ]
-|  (Rake Task)          |                    |
-+-----------------------+                    | (7) Update Stats
-                                             v
-                                   +-----------------------+
-                                   | DB_CUSTOMERS(Postgres)|
-                                   +-----------------------+
+    ^     |                                                                        |
+    |     | (3) Persiste Orden (pending)                                           | (5) Lee/Escribe
+    |     v                                                                        v
+    |  +-----------------------+                                                +-----------------------+
+    |  |   DB_ORDERS (Postgres)|                                                | DB_CUSTOMERS(Postgres)|
+    |  |   (Puerto 5434)       |                                                |    (Puerto 5433)      |
+    |  +-----------------------+                                                +-----------------------+
+    |           |                                                                  |
+    |           | (4) EVENTO: "order.created" (Asíncrono)                          |
+    |           v                                                                  |
+    |  +-----------------------+                                                   |
+    |  |       RABBITMQ        | <-------------------------------------------------+
+    |  |    (Message Broker)   |      (7) EVENTO: "order.processed" (Feedback) 
+    |  +-----------------------+
+    |           |               
+    +-----------+ (6) Consume Evento y actualiza status a "completed"
+                  v
+         +-----------------------+
+         |   ORDER_WORKER        | --(Calls)--> [ CompleteOrderService ]
+         |  (Rake Task)          |
+         +-----------------------+
 ```
+
+### 🔁 El Flujo del Bonus (Feedback Loop)
+1. El **Customer Service** procesa el aumento del contador.
+2. Al finalizar con éxito, emite un evento `order.processed`.
+3. El **Order Service** lo escucha y actualiza el estado de la orden de `pending` a `completed`.
+4. Esto garantiza **Consistencia Eventual Bi-direccional**.
+
 
 
 ### Gestión de Variables de Entorno (.env)
