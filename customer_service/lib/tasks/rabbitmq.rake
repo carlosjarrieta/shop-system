@@ -4,7 +4,12 @@ require 'json'
 namespace :rabbitmq do
   desc "Run consumer for Shop System events"
   task consume: :environment do
-    puts " [*] Waiting for events from 'shop_system.events'. To exit press CTRL+C"
+    logger = Logger.new(Rails.root.join('log', 'rabbitmq.log'))
+    logger.formatter = proc { |severity, datetime, progname, msg| "#{datetime}: #{msg}\n" }
+    
+    msg = " [*] Waiting for events from 'shop_system.events'. To exit press CTRL+C"
+    puts msg
+    logger.info(msg)
 
     host = ENV.fetch('RABBITMQ_HOST', 'localhost')
     user = ENV.fetch('RABBITMQ_USER', 'guest')
@@ -14,14 +19,8 @@ namespace :rabbitmq do
     connection.start
 
     channel = connection.create_channel
-
-    # Exchange (must match Publisher)
     exchange = channel.fanout('shop_system.events')
-
-    # Queue (Unique to this service)
     queue = channel.queue('customer_service.orders_queue', durable: true)
-
-    # Bind queue to exchange (Subscribe)
     queue.bind(exchange)
 
     begin
@@ -29,26 +28,35 @@ namespace :rabbitmq do
         payload = JSON.parse(body)
         routing_key = delivery_info.routing_key
         
-        puts " [x] Received '#{routing_key}': #{payload}"
+        log_msg = " [x] Received '#{routing_key}': #{payload}"
+        puts log_msg
+        logger.info(log_msg)
 
         case routing_key
         when 'order.created'
-          # Consumer Logic - Strategy Pattern could be used here for multiple events
           customer_id = payload['customer_id']
           if customer = Customer.find_by(id: customer_id)
             customer.increment!(:orders_count)
-            puts " [v] Updated Customer ##{customer_id} orders_count to #{customer.orders_count}"
+            res_msg = " [v] Updated Customer ##{customer_id} orders_count to #{customer.orders_count}"
+            puts res_msg
+            logger.info(res_msg)
           else
-            puts " [!] Customer ##{customer_id} not found"
+            err_msg = " [!] Customer ##{customer_id} not found"
+            puts err_msg
+            logger.error(err_msg)
           end
         else
-          puts " [?] Unknown event type"
+          logger.warn(" [?] Unknown event type: #{routing_key}")
         end
       end
     rescue Interrupt => _
       connection.close
-      puts "Connection closed"
+      logger.info("Connection closed by user")
       exit(0)
+    rescue StandardError => e
+      logger.error("Fatal error in consumer: #{e.message}")
+      logger.error(e.backtrace.join("\n"))
+      retry
     end
   end
 end
